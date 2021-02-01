@@ -154,7 +154,13 @@ class BayesianNetwork:
                 edge_list.append(egde)
         return edge_list
 
-    def no_parents(self):
+    def no_parents(self, variable):
+        result = 0
+        for edge in all_edges(self):
+            if edge[1]:
+                result += 1
+        return result
+
 
     def sorted_nodes(self):
         """
