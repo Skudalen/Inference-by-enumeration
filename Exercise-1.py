@@ -15,7 +15,7 @@ class Variable:
         The table is a 2d array of size #events * #number_of_conditions.
         #number_of_conditions is the number of possible conditions (prod(no_parent_states))
         If the distribution is unconditional #number_of_conditions is 1.
-        Each column represents a conditional distribution and sum to 1.“
+        Each column represents a conditional distribution and sum to 1.
 
         Here is an example of a variable with 3 states and two parents cond0 and cond1,
         with 3 and 2 possible states respectively.
@@ -46,8 +46,8 @@ class Variable:
         self.no_parent_states = no_parent_states
 
         if self.table.shape[0] != self.no_states:
-            raise ValueError(f"Number of states and number of rows in table must be equal. "
-                             f"Recieved {self.no_states} number of states, but table has "
+            raise ValueError(f"Number of states and number of rows in table must be equal."
+                             f"Recieved {self.no_states} number of states, but table has"
                              f"{self.table.shape[0]} number of rows.")
 
         if self.table.shape[1] != np.prod(no_parent_states):
@@ -146,22 +146,22 @@ class BayesianNetwork:
             raise ValueError("Child variable is not added to list of variables.")
         self.edges[from_variable].append(to_variable)
 
+    """
     def all_edges(self):
         edge_list = []
         for key in self.edges.keys():
             for value in self.edges[key]:
-                edge = tuple(key, value)
+                edge = (key, value)
                 edge_list.append(edge)
         return edge_list
 
-    def no_parents(self, variable):
+    #def no_parents(self, variable, edges):
         result = 0
-        edges = self.all_edges()
         for edge in edges:
             if edge[1] == variable:
                 result += 1
         return result
-
+    """
 
     def sorted_nodes(self):
         """
@@ -171,26 +171,39 @@ class BayesianNetwork:
         """
         l_sorted = []
         s_origin_nodes = []
-        variables = self.variables.keys()
+        variable_names = self.variables.keys()
+        variables = []
+        edge_dict = self.edges
 
-        for variable in variables:
+        for variable_name in variable_names:
+            variable = self.variables[variable_name]
+            variables.append(variable)
             if not variable.parents:
                 s_origin_nodes.append(variable)
-        
+
         while s_origin_nodes:
             n_parent = s_origin_nodes.pop()
+            #print(n_parent.name)
             l_sorted.append(n_parent)
 
-            for m_child in self.edges[n_parent]:
-                self.edges[n_parent].remove(m_child)
-                if not self.no_parents(m_child):
-                    s_origin_nodes.append(m_child)
-        
-        if self.all_edges():
-            return Exception("graph has at least one cycle")
-        else: return l_sorted
+            while edge_dict[n_parent]:
+                    child_list = edge_dict[n_parent]
+                    #print(len(child_list))
+                    child = child_list[0]
+                    #print(child.name)
+                    #print(child_list)
+                    child_list.remove(child)
+                    #print(child_list)
+                    for liste in edge_dict.values():
+                        #print(liste)
+                        if child in liste:
+                            break
+                    s_origin_nodes.append(child)
 
-        return sorted
+        for variable in variables:
+            if self.edges[variable]:
+                return print("the graph has cycles")
+        return l_sorted
 
 """
 class InferenceByEnumeration:
@@ -271,6 +284,7 @@ def monty_hall():
 """
 
 def main():
+
     d1 = Variable('A', 2, [[0.8], [0.2]])
     d2 = Variable('B', 2, [[0.5, 0.2],
                         [0.5, 0.8]],
@@ -308,7 +322,8 @@ def main():
     bn.add_edge(d2, d4)
 
     sorted = BayesianNetwork.sorted_nodes(bn)
-    print(sorted)
+    for v in sorted:
+        print(v.name)
 
 if __name__ == '__main__':
     # problem3c()
