@@ -15,7 +15,7 @@ class Variable:
         The table is a 2d array of size #events * #number_of_conditions.
         #number_of_conditions is the number of possible conditions (prod(no_parent_states))
         If the distribution is unconditional #number_of_conditions is 1.
-        Each column represents a conditional distribution and sum to 1.
+        Each column represents a conditional distribution and sum to 1.“
 
         Here is an example of a variable with 3 states and two parents cond0 and cond1,
         with 3 and 2 possible states respectively.
@@ -146,12 +146,39 @@ class BayesianNetwork:
             raise ValueError("Child variable is not added to list of variables.")
         self.edges[from_variable].append(to_variable)
 
+    def all_edges(self):
+        edge_list = []
+        for key in self.edges.keys():
+            for value in self.edges[key]:
+                edge = tuple(key, value)
+                edge_list.append(egde)
+        return edge_list
+
+    def no_parents(self):
+
     def sorted_nodes(self):
         """
         TODO: Implement Kahn's algorithm (or some equivalent algorithm) for putting
               variables in lexicographical topological order.
         Returns: List of sorted variable names.
         """
+        L_sorted = []
+        S_origin_nodes = []
+        variables = self.variables.keys()
+
+        for variable in variables:
+            if not variable.parents:
+                S_origin_nodes.append(variable)
+        
+        while S_origin_nodes:
+            n_parent = S_origin_nodes.pop()
+            L_sorted.append(n_parent)
+
+            for m_child in self.edges[n_parent]:
+                self.edges[n_parent].remove(m_child)
+
+
+        return sorted
 
 
 class InferenceByEnumeration:
@@ -232,4 +259,4 @@ def monty_hall():
 if __name__ == '__main__':
     problem3c()
     # monty_hall()
-    
+
