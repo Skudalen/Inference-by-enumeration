@@ -151,13 +151,14 @@ class BayesianNetwork:
         for key in self.edges.keys():
             for value in self.edges[key]:
                 edge = tuple(key, value)
-                edge_list.append(egde)
+                edge_list.append(edge)
         return edge_list
 
     def no_parents(self, variable):
         result = 0
-        for edge in all_edges(self):
-            if edge[1]:
+        edges = self.all_edges()
+        for edge in edges:
+            if edge[1] == variable:
                 result += 1
         return result
 
@@ -182,16 +183,16 @@ class BayesianNetwork:
 
             for m_child in self.edges[n_parent]:
                 self.edges[n_parent].remove(m_child)
-                if not no_parents(self, m_child):
+                if not self.no_parents(m_child):
                     s_origin_nodes.append(m_child)
         
-        if all_edges(self):
+        if self.all_edges():
             return Exception("graph has at least one cycle")
         else: return l_sorted
 
         return sorted
 
-
+"""
 class InferenceByEnumeration:
     def __init__(self, bayesian_network):
         self.bayesian_network = bayesian_network
@@ -206,14 +207,15 @@ class InferenceByEnumeration:
         # to make sure that a function doesn't change the variable, you should pass a copy.
         # You can make a copy of a variable by calling variable.copy()
 
-    def _enumerate_all(self, vars, evidence):
+    #def _enumerate_all(self, vars, evidence):
         # TODO: Implement Enumerate-All algortihm as described in Problem 4 b)
 
-    def query(self, var, evidence={}):
-        """
-        Wrapper around "_enumeration_ask" that returns a
-        Tabular variable instead of a vector
-        """
+    #def query(self, var, evidence={}):
+        
+        
+        #Wrapper around "_enumeration_ask" that returns a
+        #Tabular variable instead of a vector 
+        
         q = self._enumeration_ask(var, evidence).reshape(-1, 1)
         return Variable(var, self.bayesian_network.variables[var].no_states, q)
 
@@ -266,8 +268,50 @@ def monty_hall():
     # TODO: Implement the monty hall problem as described in Problem 4c)
     pass
 
+"""
+
+def main():
+    d1 = Variable('A', 2, [[0.8], [0.2]])
+    d2 = Variable('B', 2, [[0.5, 0.2],
+                        [0.5, 0.8]],
+                parents=['A'],
+                no_parent_states=[2])
+    d3 = Variable('C', 2, [[0.1, 0.3],
+                        [0.9, 0.7]],
+                parents=['B'],
+                no_parent_states=[2])
+    d4 = Variable('D', 2, [[0.6, 0.8],
+                        [0.4, 0.2]],
+                parents=['B'],
+                no_parent_states=[2])
+
+    print(f"Probability distribution, P({d1.name})")
+    print(d1)
+
+    print(f"Probability distribution, P({d2.name} | {d1.name})")
+    print(d2)
+
+    print(f"Probability distribution, P({d3.name} | {d2.name})")
+    print(d3)
+
+    print(f"Probability distribution, P({d4.name} | {d2.name})")
+    print(d4)
+
+    bn = BayesianNetwork()
+
+    bn.add_variable(d1)
+    bn.add_variable(d2)
+    bn.add_variable(d3)
+    bn.add_variable(d4)
+    bn.add_edge(d1, d2)
+    bn.add_edge(d2, d3)
+    bn.add_edge(d2, d4)
+
+    sorted = BayesianNetwork.sorted_nodes(bn)
+    print(sorted)
 
 if __name__ == '__main__':
-    problem3c()
+    # problem3c()
     # monty_hall()
-
+    main()
+    
