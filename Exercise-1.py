@@ -168,21 +168,26 @@ class BayesianNetwork:
               variables in lexicographical topological order.
         Returns: List of sorted variable names.
         """
-        L_sorted = []
-        S_origin_nodes = []
+        l_sorted = []
+        s_origin_nodes = []
         variables = self.variables.keys()
 
         for variable in variables:
             if not variable.parents:
-                S_origin_nodes.append(variable)
+                s_origin_nodes.append(variable)
         
-        while S_origin_nodes:
-            n_parent = S_origin_nodes.pop()
-            L_sorted.append(n_parent)
+        while s_origin_nodes:
+            n_parent = s_origin_nodes.pop()
+            l_sorted.append(n_parent)
 
             for m_child in self.edges[n_parent]:
                 self.edges[n_parent].remove(m_child)
-
+                if not no_parents(self, m_child):
+                    s_origin_nodes.append(m_child)
+        
+        if all_edges(self):
+            return Exception("graph has at least one cycle")
+        else: return l_sorted
 
         return sorted
 
