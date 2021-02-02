@@ -47,10 +47,8 @@ class Variable:
 
         
         if self.table.shape[0] != self.no_states:
-            raise ValueError(f"Number of states and number of rows in table must be equal."
-                             f"Recieved {self.no_states} number of states, but table has"
-                             f"{self.table.shape[0]} number of rows.")
-
+            #raise ValueError(f"Number of states and number of rows in table must be equal.Recieved {self.no_states} number of states, but table has {self.table.shape[0]} number of rows.")
+            raise ValueError("feil")
         if self.table.shape[1] != np.prod(no_parent_states):
             raise ValueError("Number of table columns does not match number of parent states combinations.")
 
@@ -207,11 +205,16 @@ class BayesianNetwork:
                 return print("the graph has cycles")
         return l_sorted
 
-"""
+
 class InferenceByEnumeration:
     def __init__(self, bayesian_network):
         self.bayesian_network = bayesian_network
         self.topo_order = bayesian_network.sorted_nodes()
+
+    def normalize(self, query)
+        z = sum(query)
+        q = [element * 1/z for element in query] 
+        return q
 
     def _enumeration_ask(self, X, evidence):
         # TODO: Implement Enumeration-Ask algortihm as described in Problem 4 b)
@@ -224,10 +227,10 @@ class InferenceByEnumeration:
         # to make sure that a function doesn't change the variable, you should pass a copy.
         # You can make a copy of a variable by calling variable.copy()
 
-    #def _enumerate_all(self, vars, evidence):
+    def _enumerate_all(self, vars, evidence):
         # TODO: Implement Enumerate-All algortihm as described in Problem 4 b)
 
-    #def query(self, var, evidence={}):
+    def query(self, var, evidence={}):
         
         
         #Wrapper around "_enumeration_ask" that returns a
@@ -284,17 +287,20 @@ def problem3c():
 def monty_hall():
     # TODO: Implement the monty hall problem as described in Problem 4c)
     pass
-"""
+
 def main():
     d1 = Variable('A', 2, [[0.8], [0.2]])
+    print('1')
     d2 = Variable('B', 2, [[0.5, 0.2],
                            [0.5, 0.8]],
                   parents=['A'],
                   no_parent_states=[2])
+    print('1')
     d3 = Variable('C', 2, [[0.1, 0.3],
                            [0.9, 0.7]],
                   parents=['B'],
                   no_parent_states=[2])
+    print('1')
     d4 = Variable('D', 2, [[0.6, 0.8],
                            [0.4, 0.2]],
                   parents=['B'],
@@ -329,4 +335,4 @@ def main():
 if __name__ == '__main__':
     # problem3c()
     # monty_hall()
-    main()
+    # main()
