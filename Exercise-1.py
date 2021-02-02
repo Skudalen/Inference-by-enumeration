@@ -226,18 +226,36 @@ class InferenceByEnumeration:
        
 
         for index in indexes_of_x_list: 
-            query_of_x[index] = self._enumerate_all(vars, evidence)
-        return self.normalize()
+            query_of_x[index] = self._enumerate_all(vars.copy(), evidence.copy())
+        return self.normalize(query_of_x)
 
-
-        # Reminder:
-        # When mutable types (lists, dictionaries, etc.) are passed to functions in python
-        # it is actually passing a pointer to that variable. This means that if you want
-        # to make sure that a function doesn't change the variable, you should pass a copy.
-        # You can make a copy of a variable by calling variable.copy()
+    def get_parents(self, variable): #returns list of parents-variables
+        var_parents = []
+        for parent_name in variable.parents:
+            var_parents.append(self.bayesian_network.variables[parent_name])
+        return var_parents
 
     def _enumerate_all(self, vars, evidence):
         # TODO: Implement Enumerate-All algortihm as described in Problem 4 b)
+        if not vars: 
+            return 1.0
+
+        y_variable = vars.pop()
+        y_parents = self.get_parents(y_variable)
+        y_parent_states_dict = {}
+        for parent in y_parents:
+            y_parent_states_dict[parent] = parent.no_states
+        
+        for e in evidence.values()
+            if y_variable.value == e: #checks if y (of Y) is in evidence. How??
+                known_value = y_variable.value
+                return y_variable.probability(known_value, ?) 
+                * self._enumerate_all(vars.copy(), evidence.values()) # is ? e or y_parent_states_dict 
+            else:
+                for y_state in y_variable.no_states:
+                    return y_variable.probability(y_state, ?) # ^^
+                    * self._enumerate_all(vars.copy(), evidence.values())
+
 
     def query(self, var, evidence={}):
         
