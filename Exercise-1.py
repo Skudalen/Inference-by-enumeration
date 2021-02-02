@@ -45,9 +45,8 @@ class Variable:
         self.parents = parents
         self.no_parent_states = no_parent_states
 
-        
         if self.table.shape[0] != self.no_states:
-            #raise ValueError(f"Number of states and number of rows in table must be equal.Recieved {self.no_states} number of states, but table has {self.table.shape[0]} number of rows.")
+            # raise ValueError(f"Number of states and number of rows in table must be equal.Recieved {self.no_states} number of states, but table has {self.table.shape[0]} number of rows.")
             raise ValueError("feil")
         if self.table.shape[1] != np.prod(no_parent_states):
             raise ValueError("Number of table columns does not match number of parent states combinations.")
@@ -57,8 +56,7 @@ class Variable:
 
         if len(parents) != len(no_parent_states):
             raise ValueError("Number of parents must match number of length of list no_parent_states.")
-        
-        
+
     def __str__(self):
         """
         Pretty string for the table distribution
@@ -70,7 +68,7 @@ class Variable:
         for (i, e) in enumerate(self.parents):
             s += '+----------+' + '----------+' * width + '\n'
             gi = grid[i].reshape(-1)
-            s += f'|{e:^10}|' + '|'.join([f'{e + "("+str(j)+")":^10}' for j in gi])
+            s += f'|{e:^10}|' + '|'.join([f'{e + "(" + str(j) + ")":^10}' for j in gi])
             s += '|\n'
 
         for i in range(self.no_states):
@@ -82,7 +80,7 @@ class Variable:
         s += '+----------+' + '----------+' * width + '\n'
 
         return s
-    
+
     def probability(self, state, parentstates):
         """
         Returns probability of variable taking on a "state" given "parentstates"
@@ -106,7 +104,7 @@ class Variable:
         table_index = 0
         for variable in self.parents:
             if variable not in parentstates:
-                raise ValueError(f"Variable {variable.name} does not have a defined value in parentstates.")
+                raise ValueError(f"Variable {variable} does not have a defined value in parentstates.")
 
             var_index = self.parents.index(variable)
             table_index += parentstates[variable] * np.prod(self.no_parent_states[:var_index])
@@ -123,9 +121,10 @@ class BayesianNetwork:
     Edges are stored in a dictionary. A node's children can be accessed by
     self.edges[variable]. Both the key and value in this dictionary is a Variable.
     """
+
     def __init__(self):
         self.edges = defaultdict(lambda: [])  # All nodes start out with 0 edges
-        self.variables = {}                   # Dictionary of "name":TabularDistribution
+        self.variables = {}  # Dictionary of "name":TabularDistribution
 
     def add_variable(self, variable):
         """
@@ -146,8 +145,7 @@ class BayesianNetwork:
             raise ValueError("Child variable is not added to list of variables.")
         self.edges[from_variable].append(to_variable)
 
-    
-    def all_edges(self): # not used help function
+    def all_edges(self):  # not used help function
         edge_list = []
         for key in self.edges.keys():
             for value in self.edges[key]:
@@ -155,13 +153,12 @@ class BayesianNetwork:
                 edge_list.append(edge)
         return edge_list
 
-    def no_parents(self, variable, edges): # not used help function
+    def no_parents(self, variable, edges):  # not used help function
         result = 0
         for edge in edges:
             if edge[1] == variable:
                 result += 1
         return result
-    
 
     def sorted_nodes(self):
         """
@@ -171,9 +168,10 @@ class BayesianNetwork:
         """
         l_sorted = []
         s_origin_nodes = []
-        variable_names = self.variables.keys()
+        variable_names = list(self.variables.keys()).copy()
         variables = []
-        edge_dict = self.edges
+        edge_dict = self.edges.copy()
+        children_of_variable = {}
 
         for variable_name in variable_names:
             variable = self.variables[variable_name]
@@ -183,25 +181,29 @@ class BayesianNetwork:
 
         while s_origin_nodes:
             n_parent = s_origin_nodes.pop()
-            #print(n_parent.name)
+            # print(n_parent.name)
             l_sorted.append(n_parent)
 
             while edge_dict[n_parent]:
-                    child_list = edge_dict[n_parent]
-                    #print(len(child_list))
-                    child = child_list[0]
-                    #print(child.name)
-                    #print(child_list)
-                    child_list.remove(child)
-                    #print(child_list)
-                    for liste in edge_dict.values():
-                        #print(liste)
-                        if child in liste:
-                            break
-                    s_origin_nodes.append(child)
+                child_list = edge_dict[n_parent]
+                children_of_variable[n_parent] = child_list
+                children_of_n = children_of_variable[n_parent]
+                # print(len(child_list))
+                child = children_of_n[0]
+                # print(child.name)
+                # print(child_list)
+                children_of_n.remove(child)
+                # print(child_list)
+                for liste in children_of_variable.values():
+                    # print(liste)
+                    if child in liste:
+                        break
+                    else:
+                        s_origin_nodes.append(child)
+                child_list.append(child)
 
         for variable in variables:
-            if self.edges[variable]:
+            if children_of_variable[variable]:
                 return print("the graph has cycles")
         return l_sorted
 
@@ -211,25 +213,29 @@ class InferenceByEnumeration:
         self.bayesian_network = bayesian_network
         self.topo_order = bayesian_network.sorted_nodes()
 
-    def normalize(self, query)
+    def normalize(self, query):
         z = sum(query)
-        q = [element * 1/z for element in query] # now sums to 1
+        q = [element * 1 / z for element in query]  # now sums to 1
         return q
 
     def _enumeration_ask(self, X, evidence):
         # TODO: Implement Enumeration-Ask algortihm as described in Problem 4 b)
 
-        query_of_x = [] # distribution of x, but initially empty
-        x = self.bayesian_network.variables[X] # the actual varibale x with name X
-        indexes_of_x_list = list(range(x.no_states))
-        vars = self.bayesian_network.sorted_nodes()
-       
+        query_of_x = []  # distribution of x, but initially empty
+        x_variable = self.bayesian_network.variables[X]  # the actual variable x with name X
+        vars = self.topo_order
 
-        for index in indexes_of_x_list: 
-            query_of_x[index] = self._enumerate_all(vars.copy(), evidence.copy())
+        x_evidence = evidence.copy()
+        new_vars = vars.copy()
+
+        for x_state in range(x_variable.no_states):
+            query_of_x.insert(x_state, self._enumerate_all(new_vars, x_evidence))
+            print(query_of_x)
+            x_evidence[x_variable.name] = x_variable
+
         return self.normalize(query_of_x)
 
-    def get_parents(self, variable): #returns list of parents-variables
+    def get_parents(self, variable):  # returns list of parents-variables
         var_parents = []
         for parent_name in variable.parents:
             var_parents.append(self.bayesian_network.variables[parent_name])
@@ -237,7 +243,7 @@ class InferenceByEnumeration:
 
     def _enumerate_all(self, vars, evidence):
         # TODO: Implement Enumerate-All algortihm as described in Problem 4 b)
-        if not vars: 
+        if not vars:
             return 1.0
 
         y_variable = vars.pop()
@@ -245,25 +251,35 @@ class InferenceByEnumeration:
         y_parent_states_dict = {}
         for parent in y_parents:
             y_parent_states_dict[parent] = parent.no_states
-        
+
+        y_evidence = evidence.copy()
+        summ = 0
+
+        if y_variable in y_evidence:
+            return y_variable.probability(y_variable.no_states, y_evidence) * self._enumerate_all(vars.copy(), y_evidence)
+        else:
+            for y_state in range(y_variable.no_states):
+                summ += y_variable.probability(y_state, evidence) * self._enumerate_all(vars.copy(), y_evidence)
+                y_evidence[y_variable.name] = y_variable
+            return summ
+
+        """ #First try
         for e in evidence.values()
             if y_variable.value == e: #checks if y (of Y) is in evidence. How??
                 known_value = y_variable.value
-                return y_variable.probability(known_value, ?) 
+                return y_variable.probability(known_value, e) 
                 * self._enumerate_all(vars.copy(), evidence.values()) # is ? e or y_parent_states_dict 
-            
+
         for y_state in y_variable.no_states:
             return y_variable.probability(y_state, ?) # ^^
             * self._enumerate_all(vars.copy(), evidence.values())
-
+        """
 
     def query(self, var, evidence={}):
-        
-        
-        #Wrapper around "_enumeration_ask" that returns a
-        #Tabular variable instead of a vector 
-        
-        q = self._enumeration_ask(var, evidence).reshape(-1, 1)
+
+        # Wrapper around "_enumeration_ask" that returns a
+        # Tabular variable instead of a vector
+        q = np.array(self._enumeration_ask(var, evidence)).reshape(-1, 1)
         return Variable(var, self.bayesian_network.variables[var].no_states, q)
 
 
@@ -305,29 +321,35 @@ def problem3c():
     bn.add_edge(d2, d4)
 
     inference = InferenceByEnumeration(bn)
-    posterior = inference.query('C', {'D': 1})
 
-    print(f"Probability distribution, P({d3.name} | !{d4.name})")
+    #1
+    #posterior = inference.query('A', {'C': 1, 'D': 1})
+    #print(f"Probability distribution, P({d1.name} | !{d3.name}, {d4.name})")
+
+    #2
+    posterior = inference.query('A', {})
+    print(f"Probability distribution, P({d1.name})")
+
     print(posterior)
+
+
 
 
 def monty_hall():
     # TODO: Implement the monty hall problem as described in Problem 4c)
     pass
 
+
 def main():
     d1 = Variable('A', 2, [[0.8], [0.2]])
-    print('1')
     d2 = Variable('B', 2, [[0.5, 0.2],
                            [0.5, 0.8]],
                   parents=['A'],
                   no_parent_states=[2])
-    print('1')
     d3 = Variable('C', 2, [[0.1, 0.3],
                            [0.9, 0.7]],
                   parents=['B'],
                   no_parent_states=[2])
-    print('1')
     d4 = Variable('D', 2, [[0.6, 0.8],
                            [0.4, 0.2]],
                   parents=['B'],
@@ -355,12 +377,17 @@ def main():
     bn.add_edge(d2, d3)
     bn.add_edge(d2, d4)
 
-    sorted = bn.sorted_nodes()
+    inference = InferenceByEnumeration(bn)
+
+    #sorted = bn.sorted_nodes()
+    #print(sorted)
+
+    # sorted = bn.sorted_nodes()
+    sorted = inference.bayesian_network.sorted_nodes()
     print(sorted)
 
 
 if __name__ == '__main__':
-    # problem3c()
+    #problem3c()
     # monty_hall()
-    # main()
-    
+    main()
