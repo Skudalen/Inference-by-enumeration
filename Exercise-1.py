@@ -146,8 +146,8 @@ class BayesianNetwork:
             raise ValueError("Child variable is not added to list of variables.")
         self.edges[from_variable].append(to_variable)
 
-    """
-    def all_edges(self):
+    
+    def all_edges(self): # not used help function
         edge_list = []
         for key in self.edges.keys():
             for value in self.edges[key]:
@@ -155,13 +155,13 @@ class BayesianNetwork:
                 edge_list.append(edge)
         return edge_list
 
-    #def no_parents(self, variable, edges):
+    def no_parents(self, variable, edges): # not used help function
         result = 0
         for edge in edges:
             if edge[1] == variable:
                 result += 1
         return result
-    """
+    
 
     def sorted_nodes(self):
         """
@@ -213,13 +213,22 @@ class InferenceByEnumeration:
 
     def normalize(self, query)
         z = sum(query)
-        q = [element * 1/z for element in query] 
+        q = [element * 1/z for element in query] # now sums to 1
         return q
 
     def _enumeration_ask(self, X, evidence):
         # TODO: Implement Enumeration-Ask algortihm as described in Problem 4 b)
 
-        
+        query_of_x = [] # distribution of x, but initially empty
+        x = self.bayesian_network.variables[X] # the actual varibale x with name X
+        indexes_of_x_list = list(range(x.no_states))
+        vars = self.bayesian_network.sorted_nodes()
+       
+
+        for index in indexes_of_x_list: 
+            query_of_x[index] = self._enumerate_all(vars, evidence)
+        return self.normalize()
+
 
         # Reminder:
         # When mutable types (lists, dictionaries, etc.) are passed to functions in python
@@ -336,3 +345,4 @@ if __name__ == '__main__':
     # problem3c()
     # monty_hall()
     # main()
+    
