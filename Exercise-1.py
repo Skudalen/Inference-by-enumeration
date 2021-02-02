@@ -251,10 +251,10 @@ class InferenceByEnumeration:
                 known_value = y_variable.value
                 return y_variable.probability(known_value, ?) 
                 * self._enumerate_all(vars.copy(), evidence.values()) # is ? e or y_parent_states_dict 
-            else:
-                for y_state in y_variable.no_states:
-                    return y_variable.probability(y_state, ?) # ^^
-                    * self._enumerate_all(vars.copy(), evidence.values())
+            
+        for y_state in y_variable.no_states:
+            return y_variable.probability(y_state, ?) # ^^
+            * self._enumerate_all(vars.copy(), evidence.values())
 
 
     def query(self, var, evidence={}):
