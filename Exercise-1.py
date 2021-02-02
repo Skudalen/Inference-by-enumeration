@@ -45,6 +45,7 @@ class Variable:
         self.parents = parents
         self.no_parent_states = no_parent_states
 
+        
         if self.table.shape[0] != self.no_states:
             raise ValueError(f"Number of states and number of rows in table must be equal."
                              f"Recieved {self.no_states} number of states, but table has"
@@ -58,7 +59,8 @@ class Variable:
 
         if len(parents) != len(no_parent_states):
             raise ValueError("Number of parents must match number of length of list no_parent_states.")
-
+        
+        
     def __str__(self):
         """
         Pretty string for the table distribution
@@ -82,7 +84,7 @@ class Variable:
         s += '+----------+' + '----------+' * width + '\n'
 
         return s
-
+    
     def probability(self, state, parentstates):
         """
         Returns probability of variable taking on a "state" given "parentstates"
@@ -214,6 +216,8 @@ class InferenceByEnumeration:
     def _enumeration_ask(self, X, evidence):
         # TODO: Implement Enumeration-Ask algortihm as described in Problem 4 b)
 
+        
+
         # Reminder:
         # When mutable types (lists, dictionaries, etc.) are passed to functions in python
         # it is actually passing a pointer to that variable. This means that if you want
@@ -280,24 +284,21 @@ def problem3c():
 def monty_hall():
     # TODO: Implement the monty hall problem as described in Problem 4c)
     pass
-
 """
-
 def main():
-
     d1 = Variable('A', 2, [[0.8], [0.2]])
     d2 = Variable('B', 2, [[0.5, 0.2],
-                        [0.5, 0.8]],
-                parents=['A'],
-                no_parent_states=[2])
+                           [0.5, 0.8]],
+                  parents=['A'],
+                  no_parent_states=[2])
     d3 = Variable('C', 2, [[0.1, 0.3],
-                        [0.9, 0.7]],
-                parents=['B'],
-                no_parent_states=[2])
+                           [0.9, 0.7]],
+                  parents=['B'],
+                  no_parent_states=[2])
     d4 = Variable('D', 2, [[0.6, 0.8],
-                        [0.4, 0.2]],
-                parents=['B'],
-                no_parent_states=[2])
+                           [0.4, 0.2]],
+                  parents=['B'],
+                  no_parent_states=[2])
 
     print(f"Probability distribution, P({d1.name})")
     print(d1)
@@ -321,12 +322,11 @@ def main():
     bn.add_edge(d2, d3)
     bn.add_edge(d2, d4)
 
-    sorted = BayesianNetwork.sorted_nodes(bn)
-    for v in sorted:
-        print(v.name)
+    sorted = bn.sorted_nodes()
+    print(sorted)
+
 
 if __name__ == '__main__':
     # problem3c()
     # monty_hall()
     main()
-    
